@@ -1,3 +1,5 @@
 env 
 activate.bat
 .gitignore
+*.pyc
+*.log
