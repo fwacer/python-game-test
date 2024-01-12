@@ -16,7 +16,7 @@ class Player():
     def __init__(self, x, y):
 
         self.reset()
-        self.sprite = pygame.Rect(x, y - self.height, self.width, self.height)
+        self.sprite = pygame.Rect(x-self.width/2, y - self.height/2, self.width, self.height)
         self.direction_vector = pygame.Vector2(0,0)
         self.velocity_vector = pygame.Vector2(0,0)
 
