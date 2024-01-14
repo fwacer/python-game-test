@@ -88,7 +88,8 @@ def main():
             SPRITES.append(sprites.Asteroid())
         
         #player.user_initiated_movement(direction_vector)
-        parallax_background.move(-direction_vector)
+        if direction_vector.magnitude() != 0:
+            parallax_background.move_object_relative_to_camera(direction_vector.normalize()*player.velocity)
 
         draw(SPRITES)
     

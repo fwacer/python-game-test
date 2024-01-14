@@ -7,7 +7,7 @@ Date: 2024-01-03
 import sys
 import logging
 import logging.handlers
-import pygame as pg
+import pygame
 
 from data.main import main
 
@@ -33,5 +33,5 @@ def setup_root_logger():
 if __name__ == "__main__":
     root_logger = setup_root_logger()
     main()
-    pg.quit()
+    pygame.quit()
     sys.exit()
