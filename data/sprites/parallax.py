@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import random
 import pygame
 import pygame.gfxdraw
@@ -30,8 +31,12 @@ class Star(BaseSprite):
         self.size_multiplier = size_multiplier if size_multiplier >= 0.1 else 0.1
         self.width = round(self.width * self.size_multiplier)
         self.height = round(self.height * self.size_multiplier)
+        self.image = pygame.image.load(
+            pathlib.Path().cwd() / "resources\\graphics\\sprites\\star.png"
+        ).convert_alpha()
+        self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))
 
-    def draw(self, window):
+    """def draw(self, window):
         # pygame.draw.rect(window, self.colour, self.sprite)
         # pygame.gfxdraw.filled_ellipse(window, round(self.x), round(self.y), round(self.width), round(self.height), self.colour)
         # pygame.gfxdraw.aaellipse(window, round(self.x), round(self.y), round(self.width), round(self.height), self.colour)
@@ -44,7 +49,7 @@ class Star(BaseSprite):
             round(self.height),
         )
         pygame.gfxdraw.filled_ellipse(window, x, y, width, height, self.colour)
-        pygame.gfxdraw.aaellipse(window, x, y, width, height, self.colour)
+        pygame.gfxdraw.aaellipse(window, x, y, width, height, self.colour)"""
 
 
 class ParallaxLayer:

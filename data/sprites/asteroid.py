@@ -1,27 +1,57 @@
 import logging
 import random
+import pathlib
 import pygame
 from .. import environment as env
+from .base_sprite import BaseSprite
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
-class Asteroid:
+class Asteroid(BaseSprite):
     """Is a type of obstacle"""
 
     width = 30
     height = 30
     velocity = 6
-    colour = "red"
-    sprite = None
-    velocity_vector = None
 
-    def __init__(self):
-        self.reset()
-        self.sprite = pygame.Rect(0, 0, self.width, self.height)
+    rotation_speed_cw = 0
+    image = pygame.image.load(
+        pathlib.Path().cwd() / "resources\\graphics\\sprites\\asteroid.png"
+    )
+
+    def __init__(self, x: int = 0, y: int = 0):
+        super().__init__(
+            x=x,
+            y=y,
+            width=self.width,
+            height=self.height,
+            colour=pygame.Color("red"),
+            can_wrap_around_screen=True,
+            can_leave_screen=True,
+            image=self.image,
+        )
+        self.nonrotated_image = pygame.transform.smoothscale(
+            self.image, (self.width, self.height)
+        )
+        self.image = self.nonrotated_image
 
         self.move_in_random_direction()
         self.teleport_to_random_edge()
+        self.last_rotate_time = pygame.time.get_ticks()
+        self.rotation_speed_cw = random.randint(-30, 30)
+
+    def update(self):
+        super().update()
+        if (pygame.time.get_ticks() - self.last_rotate_time) > 20:
+            logger.debug(f"{self.direction_vector=}")
+            self.direction_vector = self.direction_vector.rotate(self.rotation_speed_cw)
+            self.image = pygame.transform.rotate(
+                self.nonrotated_image,
+                self.direction_vector.angle_to((0, 1)),
+            )
+            self.last_rotate_time = pygame.time.get_ticks()
 
     def move_in_random_direction(self):
         # Spawn with a random direction and move at constant velocity
@@ -75,53 +105,3 @@ class Asteroid:
             self.velocity_vector[0],
             self.velocity_vector[1],
         )
-
-    def update(self, stay_on_screen: bool = False):
-        self.x += self.velocity_vector[0]
-        self.y += self.velocity_vector[1]
-
-        if stay_on_screen:
-            self.fix_out_of_bounds()
-
-    def out_of_bounds(self):
-        # Check right side:
-        if (
-            (self.x + self.width / 2) > env.screen_width
-            or (self.x - self.width / 2) < 0
-            or (self.y + self.height / 2) > env.screen_height
-            or (self.y - self.height / 2) < 0
-        ):
-            return True
-        return False
-
-    def fix_out_of_bounds(self):
-        if (self.x + self.width / 2) > env.screen_width:
-            self.x = env.screen_width - self.width / 2
-        if (self.x - self.width / 2) < 0:
-            self.x = 0 + self.width / 2
-        if (self.y + self.height / 2) > env.screen_height:
-            self.y = env.screen_height - self.height / 2
-        if (self.y - self.height / 2) < 0:
-            self.y = 0 + self.height / 2
-
-    def draw(self, window):
-        pygame.draw.rect(window, self.colour, self.sprite)
-
-    def reset(self):
-        pass
-
-    @property
-    def x(self):
-        return self.sprite.x + self.width / 2
-
-    @x.setter
-    def x(self, value):
-        self.sprite.x = value - self.width / 2
-
-    @property
-    def y(self):
-        return self.sprite.y + self.height / 2
-
-    @y.setter
-    def y(self, value):
-        self.sprite.y = value - self.height / 2

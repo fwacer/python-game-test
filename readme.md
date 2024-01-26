@@ -1,10 +1,7 @@
 
 
-
-
-
-
-
+All rights reserved
+Bryce Dombrowski
 
 Copyright/Attribution Notices:
 

@@ -17,18 +17,61 @@ from . import sprites
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.getLogger().getEffectiveLevel())
 
-WINDOW = pygame.display.set_mode((env.screen_width, env.screen_height))
-BACKGROUND_IMG = pygame.image.load(env.background_image_path).convert()
-SPRITES = []
+SCREEN = pygame.display.set_mode((env.screen_width, env.screen_height))
 parallax_background = None
 
 
-def draw(player):
+class CameraGroup(pygame.sprite.Group):
+    """
+
+    Inspired from:
+    - https://www.youtube.com/watch?v=u7LPRqrzry8
+    - https://github.com/clear-code-projects/Pygame-Cameras
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+
+        # Camera position
+        self.topleft = pygame.Vector2()
+        self.half_width = self.display_surface.get_size()[0] // 2
+        self.half_height = self.display_surface.get_size()[1] // 2
+
+        # Background
+        self.background = pygame.image.load(env.background_image_path).convert_alpha()
+        self.background_rect = self.background.get_rect(topleft=(0, 0))
+
+        self.sprites = []
+
+    def centre_target_camera(self, target: sprites.BaseSprite):
+        self.topleft.x = target.rect.centerx - self.half_width
+        self.topleft.y = target.rect.centery - self.half_height
+
+    def update(self):
+        for sprite in self.sprites:
+            sprite.update()
+
+    def draw(self, player):
+        self.centre_target_camera(player)
+
+        # Background
+        background_offset = self.background_rect.topleft - self.topleft
+        self.display_surface.blit(self.background, background_offset)
+
+        # Sprites
+        for sprite in self.sprites:
+            offset = sprite.rect.topleft - self.topleft
+            sprite.draw(self.display_surface, offset)
+
+
+"""def draw(player):
     # WINDOW.blit(BACKGROUND_IMG, (0,0))
     WINDOW.fill("black")
 
     parallax_background.update()
     parallax_background.draw(WINDOW)
+    # pygame.sprite.Group.draw(SPRITES)
     for sprite in SPRITES:
         sprite.update()
         sprite.draw(WINDOW)
@@ -36,20 +79,22 @@ def draw(player):
 
     # Note: make parallax background stars
     # centre the ship, and fly
+"""
 
 
 def main():
     LOGGER.debug("Game Start")
-    pygame.display.set_caption("asteroids-clone")
+    pygame.display.set_caption("Kuiper Belt Tactics")
 
+    camera = CameraGroup()
     player = sprites.Player(env.screen_width / 2, env.screen_height / 2)
-    SPRITES.append(player)
+    camera.sprites.append(player)
 
     on_screen_display = sprites.OnScreenDisplay()
-    SPRITES.append(on_screen_display)
+    camera.sprites.append(on_screen_display)
 
     global parallax_background
-    parallax_background = sprites.StarBackground()
+    # parallax_background = sprites.StarBackground()
     # SPRITES.append(parallax_background)
 
     clock = pygame.time.Clock()
@@ -64,7 +109,8 @@ def main():
 
         if time_since_last_asteroid >= env.asteroid_spawn_frequency:
             time_since_last_asteroid = 0
-            SPRITES.append(sprites.Asteroid())
+            if len(camera.sprites) < 10:
+                camera.sprites.append(sprites.Asteroid())
 
         for event in pygame.event.get():
             if event.type == pygame.constants.QUIT:
@@ -90,14 +136,13 @@ def main():
         if keys_pressed[pygame.K_r]:  # Refresh the background
             parallax_background = sprites.StarBackground()
         if keys_pressed[pygame.K_1]:  # Left click to add an asteroid
-            SPRITES.append(sprites.Asteroid())
+            camera.sprites.append(sprites.Asteroid(50, 50))
 
-        # player.user_initiated_movement(direction_vector)
-        if direction_vector.magnitude() != 0:
-            parallax_background.move_object_relative_to_camera(
-                direction_vector.normalize() * player.movement_speed
-            )
+        player.user_initiated_movement(direction_vector)
 
-        draw(SPRITES)
+        SCREEN.fill("#71ddee")
+        camera.update()
+        camera.draw(player)
+        pygame.display.update()
 
     pygame.quit()

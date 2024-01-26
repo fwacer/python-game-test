@@ -14,13 +14,16 @@ class BaseSprite(pygame.sprite.Sprite):
     y: int = 0
     z: int = 0
     velocity_vector: pygame.Vector2 = field(default_factory=pygame.Vector2)
+    direction_vector: pygame.Vector2 = field(
+        default_factory=lambda: pygame.Vector2(0, 1)
+    )
     colour: pygame.Color = field(default_factory=lambda: pygame.Color(0, 0, 0, 0))
     can_leave_screen: bool = True
     can_wrap_around_screen: bool = False
+    image: pygame.Surface = None
 
     def __post_init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.update()
+        pass
 
     @property
     def rect(self):
@@ -52,27 +55,33 @@ class BaseSprite(pygame.sprite.Sprite):
         if self.can_wrap_around_screen:
             self.wrap_around_screen()
 
-    def draw(self, window):
+    def draw(self, screen: pygame.Surface, offset: pygame.Vector2):
         """Subclasses will likely override this function"""
-        pygame.draw.rect(window, self.colour, self.rect)
+        if self.image:
+            screen.blit(self.image, offset)
+        else:
+            pygame.draw.rect(screen, self.colour, offset)
 
     def move_object_relative_to_camera(
         self,
-        camera_movement_vector: pygame.Vector2,
+        camera_movement_vector: pygame.Vector2 = None,
         vec_in_screen_coord_frame: bool = True,
     ):
-        if vec_in_screen_coord_frame:  # vector provided is in screen coordinate frame
+        """Parallax correction"""
+        if (
+            vec_in_screen_coord_frame
+        ):  # vector provided is in screen coordinate frame, need to transform into object coordinate frame
             camera_movement_vector_3d = project_screen_to_3d(
                 camera_movement_vector, self.z
             )
-            camera_movement_vector = pygame.Vector2(
+            local_frame_movement_vector = -pygame.Vector2(
                 camera_movement_vector_3d.x, camera_movement_vector_3d.y
             )
         else:
-            # Vector is in local coordinate frame, so we don't need to do anything
-            pass
-        self.x += -camera_movement_vector.x
-        self.y += -camera_movement_vector.y
+            # Vector is in object coordinate frame already, so we don't need to do anything
+            local_frame_movement_vector = -camera_movement_vector
+        self.x += local_frame_movement_vector.x
+        self.y += local_frame_movement_vector.y
 
     def out_of_bounds(self) -> bool:
         """Checks if sprite is out of bounds. Returns boolean"""
@@ -106,6 +115,11 @@ class BaseSprite(pygame.sprite.Sprite):
             self.y = -self.height / 2
         if (self.y + self.height / 2) < 0:  # off top side
             self.y = env.screen_height + self.height / 2
+
+    @property
+    def rotation_angle_deg(self):
+        """Measured from the y-axis (pointed down on the screen). Positive number is CCW."""
+        return self.direction_vector.angle_to(pygame.Vector2(0, 1)) + 180
 
 
 if __name__ == "__main__":
