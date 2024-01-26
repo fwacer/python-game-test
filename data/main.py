@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.getLogger().getEffectiveLevel())
 
 WINDOW = pygame.display.set_mode((env.screen_width, env.screen_height))
-BACKGROUND_IMG = pygame.image.load(env.background_image_path)
+BACKGROUND_IMG = pygame.image.load(env.background_image_path).convert()
 SPRITES = []
 parallax_background = None
 
@@ -75,19 +75,21 @@ def main():
 
         keys_pressed = pygame.key.get_pressed()
         direction_vector = pygame.math.Vector2(0, 0)
-        if keys_pressed[pygame.K_LEFT]:
-            direction_vector += pygame.Vector2(-1, 0)
-        if keys_pressed[pygame.K_RIGHT]:
-            direction_vector += pygame.Vector2(1, 0)
-        if keys_pressed[pygame.K_UP]:
+        # WASD or arrow key controls
+        if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
             direction_vector += pygame.Vector2(0, -1)
-        if keys_pressed[pygame.K_DOWN]:
+        if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
             direction_vector += pygame.Vector2(0, 1)
+        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]:
+            direction_vector += pygame.Vector2(-1, 0)
+        if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
+            direction_vector += pygame.Vector2(1, 0)
+
         if keys_pressed[pygame.K_ESCAPE]:
             running = False  # Exit the game
-        if keys_pressed[pygame.K_r]:
+        if keys_pressed[pygame.K_r]:  # Refresh the background
             parallax_background = sprites.StarBackground()
-        if keys_pressed[pygame.K_1]:
+        if keys_pressed[pygame.K_1]:  # Left click to add an asteroid
             SPRITES.append(sprites.Asteroid())
 
         # player.user_initiated_movement(direction_vector)
