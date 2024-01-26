@@ -8,11 +8,11 @@ from ..utils import project_screen_to_3d, project_3d_to_screen
 class BaseSprite(pygame.sprite.Sprite):
     """Is the base sprite that all other sprites should be derived from"""
 
-    width: float
-    height: float
-    x: float = 0.0
-    y: float = 0.0
-    z: float = 0.0
+    width: int
+    height: int
+    x: int = 0
+    y: int = 0
+    z: int = 0
     velocity_vector: pygame.Vector2 = field(default_factory=pygame.Vector2)
     colour: pygame.Color = field(default_factory=lambda: pygame.Color(0, 0, 0, 0))
     can_leave_screen: bool = True
@@ -24,7 +24,9 @@ class BaseSprite(pygame.sprite.Sprite):
 
     @property
     def rect(self):
-        return pygame.Rect(self.x, self.y, self.width, self.height)
+        return pygame.Rect(
+            self.x - self.width / 2, self.y - self.height / 2, self.width, self.height
+        )
 
     def reset(self):
         raise NotImplementedError()

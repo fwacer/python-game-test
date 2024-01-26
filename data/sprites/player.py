@@ -1,34 +1,53 @@
+from dataclasses import dataclass, field
 import pygame
 from .. import environment as env
+from . import base_sprite
 
 
-class Player:
+class Player(base_sprite.BaseSprite):
     """Represents the player"""
 
     width = 40
     height = 60
-    velocity = 5
-    colour = "white"
-    sprite = None
-    direction_vector = None
-    velocity_vector = None
+    movement_speed = 5
+    colour = pygame.Color("white")
+    can_wrap_around_screen = False
 
     def __init__(self, x, y):
-        self.reset()
-        self.sprite = pygame.Rect(
-            x - self.width / 2, y - self.height / 2, self.width, self.height
+        super().__init__(
+            x=x,
+            y=y,
+            width=self.width,
+            height=self.height,
+            colour=self.colour,
+            can_wrap_around_screen=self.can_wrap_around_screen,
         )
+
+    """def __post_init__(self):
+        super().__init__(
+            x=x,
+            y=y,
+            width=self.width,
+            height=self.height,
+            colour=self.colour,
+            can_wrap_around_screen=self.can_wrap_around_screen,
+        )
+
+        # self.reset()
+        # self.sprite = pygame.Rect(
+        #    x - self.width / 2, y - self.height / 2, self.width, self.height
+        # )
         self.direction_vector = pygame.Vector2(0, 0)
-        self.velocity_vector = pygame.Vector2(0, 0)
+        self.velocity_vector = pygame.Vector2(0, 0)"""
 
     def user_initiated_movement(self, new_direction: pygame.Vector2):
         """Add to the direction that the player will move"""
         if new_direction.magnitude() != 0:
-            self.velocity_vector = new_direction.normalize() * self.velocity
+            self.velocity_vector = new_direction.normalize() * self.movement_speed
         else:
             self.velocity_vector *= 0
 
-    def update(self):
+    '''def update(self):
         """update position"""
         self.x += self.velocity_vector[0]
         self.y += self.velocity_vector[1]
@@ -75,4 +94,4 @@ class Player:
 
     @y.setter
     def y(self, value):
-        self.sprite.y = value - self.height / 2
+        self.sprite.y = value - self.height / 2'''

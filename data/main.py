@@ -95,7 +95,7 @@ def main():
         # player.user_initiated_movement(direction_vector)
         if direction_vector.magnitude() != 0:
             parallax_background.move_object_relative_to_camera(
-                direction_vector.normalize() * player.velocity
+                direction_vector.normalize() * player.movement_speed
             )
 
         draw(SPRITES)
