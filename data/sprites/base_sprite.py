@@ -5,21 +5,26 @@ from ..utils import project_screen_to_3d, project_3d_to_screen
 
 
 @dataclass(kw_only=True)
-class BaseSprite:
+class BaseSprite(pygame.sprite.Sprite):
     """Is the base sprite that all other sprites should be derived from"""
 
-    width: int
-    height: int
-    x: int = 0
-    y: int = 0
-    z: int = 0
+    width: float
+    height: float
+    x: float = 0.0
+    y: float = 0.0
+    z: float = 0.0
     velocity_vector: pygame.Vector2 = field(default_factory=pygame.Vector2)
     colour: pygame.Color = field(default_factory=lambda: pygame.Color(0, 0, 0, 0))
     can_leave_screen: bool = True
     can_wrap_around_screen: bool = False
 
     def __post_init__(self):
-        pass
+        pygame.sprite.Sprite.__init__(self)
+        self.update()
+
+    @property
+    def rect(self):
+        return pygame.Rect(self.x, self.y, self.width, self.height)
 
     def reset(self):
         raise NotImplementedError()
@@ -46,9 +51,8 @@ class BaseSprite:
             self.wrap_around_screen()
 
     def draw(self, window):
-        pygame.draw.rect(
-            window, self.colour, pygame.Rect(self.x, self.y, self.width, self.height)
-        )
+        """Subclasses will likely override this function"""
+        pygame.draw.rect(window, self.colour, self.rect)
 
     def move_object_relative_to_camera(
         self,
