@@ -22,8 +22,9 @@ BACKGROUND_IMG = pygame.image.load(env.background_image_path)
 SPRITES = []
 parallax_background = None
 
+
 def draw(player):
-    #WINDOW.blit(BACKGROUND_IMG, (0,0))
+    # WINDOW.blit(BACKGROUND_IMG, (0,0))
     WINDOW.fill("black")
 
     parallax_background.update()
@@ -34,13 +35,14 @@ def draw(player):
     pygame.display.update()
 
     # Note: make parallax background stars
-    # centre the ship, and fly 
+    # centre the ship, and fly
+
 
 def main():
     LOGGER.debug("Game Start")
     pygame.display.set_caption("asteroids-clone")
 
-    player = sprites.Player(env.screen_width/2, env.screen_height/2)
+    player = sprites.Player(env.screen_width / 2, env.screen_height / 2)
     SPRITES.append(player)
 
     on_screen_display = sprites.OnScreenDisplay()
@@ -48,7 +50,7 @@ def main():
 
     global parallax_background
     parallax_background = sprites.StarBackground()
-    #SPRITES.append(parallax_background)
+    # SPRITES.append(parallax_background)
 
     clock = pygame.time.Clock()
 
@@ -56,12 +58,13 @@ def main():
 
     running = True
     while running:
-        time_since_last_asteroid += clock.tick(60) # Add the number of ms since last tick
+        time_since_last_asteroid += clock.tick(
+            60
+        )  # Add the number of ms since last tick
 
         if time_since_last_asteroid >= env.asteroid_spawn_frequency:
             time_since_last_asteroid = 0
             SPRITES.append(sprites.Asteroid())
-
 
         for event in pygame.event.get():
             if event.type == pygame.constants.QUIT:
@@ -71,27 +74,28 @@ def main():
                     running = False
 
         keys_pressed = pygame.key.get_pressed()
-        direction_vector = pygame.math.Vector2(0,0)
+        direction_vector = pygame.math.Vector2(0, 0)
         if keys_pressed[pygame.K_LEFT]:
-            direction_vector += pygame.Vector2(-1,0)
+            direction_vector += pygame.Vector2(-1, 0)
         if keys_pressed[pygame.K_RIGHT]:
-            direction_vector += pygame.Vector2(1,0)
+            direction_vector += pygame.Vector2(1, 0)
         if keys_pressed[pygame.K_UP]:
-            direction_vector += pygame.Vector2(0,-1)
+            direction_vector += pygame.Vector2(0, -1)
         if keys_pressed[pygame.K_DOWN]:
-            direction_vector += pygame.Vector2(0,1)
+            direction_vector += pygame.Vector2(0, 1)
         if keys_pressed[pygame.K_ESCAPE]:
-            running = False # Exit the game
+            running = False  # Exit the game
         if keys_pressed[pygame.K_r]:
             parallax_background = sprites.StarBackground()
         if keys_pressed[pygame.K_1]:
             SPRITES.append(sprites.Asteroid())
-        
-        #player.user_initiated_movement(direction_vector)
+
+        # player.user_initiated_movement(direction_vector)
         if direction_vector.magnitude() != 0:
-            parallax_background.move_object_relative_to_camera(direction_vector.normalize()*player.velocity)
+            parallax_background.move_object_relative_to_camera(
+                direction_vector.normalize() * player.velocity
+            )
 
         draw(SPRITES)
-    
-    pygame.quit()
 
+    pygame.quit()
